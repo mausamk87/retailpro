@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#f97316">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>RetailPro</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f172a;--bg2:#1e293b;--bg3:#273449;--card:#1e293b;--border:#334155;--accent:#f97316;--accent2:#fb923c;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--success:#22c55e;--danger:#ef4444;--warning:#eab308;--info:#38bdf8;--radius:16px;--radius-sm:10px;--nav-h:68px;--safe:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg);overflow:hidden}
+.screen.active{display:flex}
+#loadingScreen{align-items:center;justify-content:center}
+.loader-logo{width:64px;height:64px;background:var(--accent);border-radius:18px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:#fff;margin:0 auto 20px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0.4)}50%{box-shadow:0 0 0 16px rgba(249,115,22,0)}}
+.loader-text{font-size:14px;color:var(--text2);text-align:center}
+#loginScreen{align-items:center;justify-content:center;padding:32px 24px;position:relative;overflow:hidden}
+.login-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 80% 20%,rgba(249,115,22,0.12) 0%,transparent 60%)}
+.login-content{position:relative;z-index:1;width:100%;max-width:380px}
+.logo-wrap{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.logo-icon{width:52px;height:52px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:#fff;box-shadow:0 0 32px rgba(249,115,22,0.4)}
+.logo-name{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-0.5px}
+.logo-name span{color:var(--accent)}
+.login-tagline{font-size:13px;color:var(--text2);margin-bottom:40px;margin-left:2px}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;margin-bottom:20px}
+.login-card h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px}
+.login-card p{font-size:13px;color:var(--text2);margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px}
+.form-input{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:14px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--text3)}
+select.form-input{-webkit-appearance:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-primary{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:8px;box-shadow:0 4px 16px rgba(249,115,22,0.3)}
+.btn-primary:active{background:var(--accent2);transform:scale(0.98)}
+.btn-primary:disabled{opacity:0.6}
+.login-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#fca5a5;margin-top:12px;display:none}
+.login-footer{text-align:center;font-size:11px;color:var(--text3)}
+.app-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.header-left{display:flex;align-items:center;gap:10px}
+.header-logo{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#fff}
+.header-bname{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.header-role{font-size:10px;color:var(--accent);font-weight:600;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:6px}
+.icon-btn{width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.page-content{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + var(--safe) + 16px);-webkit-overflow-scrolling:touch}
+.page{display:none;padding:16px;animation:fadeIn 0.2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe));padding-bottom:var(--safe);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:var(--nav-h);cursor:pointer;position:relative}
+.nav-icon{font-size:20px;transition:transform 0.2s}
+.nav-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.3px}
+.nav-item.active .nav-label{color:var(--accent)}
+.nav-item.active .nav-icon{transform:translateY(-2px)}
+.nav-item.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2.5px;background:var(--accent);border-radius:0 0 4px 4px}
+.sale-fab{width:50px;height:50px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:0 4px 20px rgba(249,115,22,0.5);cursor:pointer;margin-top:-4px;flex:unset}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.stat-card.orange::before{background:var(--accent)}.stat-card.blue::before{background:var(--info)}.stat-card.green::before{background:var(--success)}.stat-card.red::before{background:var(--danger)}
+.stat-icon{font-size:20px;margin-bottom:8px}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:3px}
+.stat-value{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.stat-value.orange{color:var(--accent)}.stat-value.blue{color:var(--info)}.stat-value.green{color:var(--success)}.stat-value.red{color:var(--danger)}
+.section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.section-title span{font-size:11px;color:var(--accent);font-family:'DM Sans',sans-serif;cursor:pointer}
+.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.qa-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 6px;cursor:pointer}
+.qa-btn:active{background:var(--bg3);transform:scale(0.96)}
+.qa-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.qa-icon.orange{background:rgba(249,115,22,0.15)}.qa-icon.blue{background:rgba(56,189,248,0.15)}.qa-icon.green{background:rgba(34,197,94,0.15)}.qa-icon.purple{background:rgba(168,85,247,0.15)}
+.qa-label{font-size:10px;color:var(--text2);font-weight:500;text-align:center}
+.page-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.page-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.btn-add{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer}
+.tabs{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;margin-bottom:16px;gap:3px}
+.tab{flex:1;padding:8px 4px;font-size:12px;font-weight:600;text-align:center;border-radius:8px;cursor:pointer;color:var(--text3);transition:all 0.2s;text-transform:uppercase;letter-spacing:0.3px}
+.tab.active{background:var(--accent);color:#fff}
+.search-wrap{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;width:100%;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.search-wrap input{background:transparent;border:none;outline:none;font-size:14px;color:var(--text);font-family:'DM Sans',sans-serif;width:100%}
+.search-wrap input::placeholder{color:var(--text3)}
+.item-list{display:flex;flex-direction:column;gap:8px}
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.item-card:active{background:var(--bg3)}
+.item-icon{width:42px;height:42px;border-radius:10px;background:rgba(249,115,22,0.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.item-info{flex:1;min-width:0}
+.item-name{font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-meta{font-size:11px;color:var(--text3)}
+.item-right{text-align:right;flex-shrink:0}
+.item-price{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent)}
+.item-stock{font-size:11px;margin-top:2px}
+.item-stock.ok{color:var(--success)}.item-stock.low{color:var(--warning)}.item-stock.zero{color:var(--danger)}
+.empty-state{text-align:center;padding:48px 20px}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty-state h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px}
+.empty-state p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.active{display:flex}
+.modal-drawer{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding-bottom:calc(24px + var(--safe));animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.drawer-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.drawer-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.drawer-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+.drawer-close{width:32px;height:32px;background:var(--bg3);border:none;border-radius:8px;color:var(--text);font-size:18px;cursor:pointer}
+.drawer-body{padding:20px}
+.btn-save{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:8px}
+.btn-save:disabled{opacity:0.6}
+.btn-danger{width:100%;background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-sm);padding:12px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:8px}
+.more-list{display:flex;flex-direction:column;gap:8px}
+.more-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.more-item:active{background:var(--bg3)}
+.more-item-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.more-item-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.more-item-desc{font-size:11px;color:var(--text3)}
+.more-item-arrow{font-size:18px;color:var(--text3);margin-left:auto}
+.section-divider{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.coming-soon{text-align:center;padding:48px 20px}
+.coming-soon .cs-icon{font-size:48px;margin-bottom:14px}
+.coming-soon h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px}
+.coming-soon p{font-size:13px;color:var(--text2);line-height:1.6}
+.badge{display:inline-flex;background:rgba(249,115,22,0.15);color:var(--accent);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:12px;text-transform:uppercase}
+.toast{position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 16px);left:16px;right:16px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 16px;font-size:14px;font-weight:500;z-index:300;transform:translateY(20px);opacity:0;transition:all 0.3s ease;display:flex;align-items:center;gap:10px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left:3px solid var(--success)}.toast.error{border-left:3px solid var(--danger)}.toast.info{border-left:3px solid var(--info)}
+/* ADMIN */
+.user-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px}
+.user-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.user-card-name{font-size:14px;font-weight:700}
+.user-card-id{font-size:11px;color:var(--text3)}
+.perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.perm-badge{display:flex;align-items:center;gap:6px;font-size:12px;background:var(--bg3);border-radius:6px;padding:5px 8px}
+.perm-badge.on{color:var(--success)}.perm-badge.off{color:var(--text3)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="loadingScreen">
+  <div style="text-align:center">
+    <div class="loader-logo">RP</div>
+    <p class="loader-text">RetailPro loading…</p>
+  </div>
+</div>
+
+<div class="screen" id="loginScreen">
+  <div class="login-bg"></div>
+  <div class="login-content">
+    <div class="logo-wrap">
+      <div class="logo-icon">RP</div>
+      <div class="logo-name">Retail<span>Pro</span></div>
+    </div>
+    <p class="login-tagline">Smart billing for modern retailers</p>
+    <div class="login-card">
+      <h2>Sign in</h2>
+      <p>Enter your credentials to continue</p>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" class="form-input" id="loginUser" placeholder="username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" class="form-input" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+    <p class="login-footer">RetailPro © 2026 · Mausam Singh Rathod</p>
+  </div>
+</div>
+
+<div class="screen" id="appScreen">
+  <div class="app-header">
+    <div class="header-left">
+      <div class="header-logo">RP</div>
+      <div>
+        <div class="header-bname" id="headerBizName">RetailPro</div>
+        <div class="header-role" id="headerRole">User</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="icon-btn" onclick="doLogout()">🚪</div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <div class="page active" id="pageDash">
+      <div style="margin-bottom:16px">
+        <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700" id="dashGreet">Good day! 👋</h2>
+        <p style="font-size:12px;color:var(--text2);margin-top:2px" id="dashDate"></p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card orange"><div class="stat-icon">📦</div><div class="stat-label">Total Items</div><div class="stat-value orange" id="statItems">0</div></div>
+        <div class="stat-card blue"><div class="stat-icon">🏷️</div><div class="stat-label">Categories</div><div class="stat-value blue" id="statCats">0</div></div>
+        <div class="stat-card red"><div class="stat-icon">⚠️</div><div class="stat-label">Low Stock</div><div class="stat-value red" id="statLow">0</div></div>
+        <div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-label">Stock Value</div><div class="stat-value green" id="statValue">₹0</div></div>
+      </div>
+      <div class="section-title">Quick Actions</div>
+      <div class="quick-actions">
+        <div class="qa-btn" onclick="navTo('items')"><div class="qa-icon orange">📦</div><div class="qa-label">Items</div></div>
+        <div class="qa-btn" onclick="navTo('purchase')"><div class="qa-icon blue">📥</div><div class="qa-label">Purchase</div></div>
+        <div class="qa-btn" onclick="navTo('sale')"><div class="qa-icon green">🧾</div><div class="qa-label">Sale</div></div>
+        <div class="qa-btn" onclick="navTo('more')"><div class="qa-icon purple">☰</div><div class="qa-label">More</div></div>
+      </div>
+      <div class="section-title">Recent Items <span onclick="navTo('items')">View all</span></div>
+      <div id="recentItemsList"></div>
+    </div>
+
+    <div class="page" id="pageItems">
+      <div class="page-top">
+        <div class="page-title">Items</div>
+        <button class="btn-add" onclick="openItemDrawer()">+ Add</button>
+      </div>
+      <div class="tabs">
+        <div class="tab active" id="tabProducts" onclick="switchItemTab('products')">Products</div>
+        <div class="tab" id="tabCategories" onclick="switchItemTab('categories')">Categories</div>
+        <div class="tab" id="tabUnits" onclick="switchItemTab('units')">Units</div>
+      </div>
+      <div class="search-wrap"><span>🔍</span><input type="text" id="itemSearch" placeholder="Search items…" oninput="renderItems()"></div>
+      <div id="itemsContent"></div>
+    </div>
+
+    <div class="page" id="pagePurchase">
+      <div class="page-top"><div class="page-title">Purchase</div></div>
+      <div class="coming-soon"><div class="cs-icon">📥</div><h3>Purchase Module</h3><p>EAN scan → auto fill<br>IMEI tracking per unit</p><div class="badge">🔨 Coming Next</div></div>
+    </div>
+
+    <div class="page" id="pageSale">
+      <div class="page-top"><div class="page-title">New Sale</div></div>
+      <div class="coming-soon"><div class="cs-icon">🧾</div><h3>Sale / Billing</h3><p>IMEI scan → auto link stock<br>GST auto + Split payment</p><div class="badge">🔨 Coming Soon</div></div>
+    </div>
+
+    <div class="page" id="pageMore">
+      <div class="page-top"><div class="page-title">More</div></div>
+      <div class="more-list">
+        <div class="more-item" onclick="showToast('Parties coming soon','info')"><div class="more-item-icon" style="background:rgba(56,189,248,0.12)">👥</div><div><div class="more-item-name">Parties</div><div class="more-item-desc">Customers & Suppliers</div></div><div class="more-item-arrow">›</div></div>
+        <div class="more-item" onclick="showToast('Udhari coming soon','info')"><div class="more-item-icon" style="background:rgba(239,68,68,0.12)">💸</div><div><div class="more-item-name">Udhari</div><div class="more-item-desc">Outstanding tracker</div></div><div class="more-item-arrow">›</div></div>
+        <div class="more-item" onclick="showToast('Finance coming soon','info')"><div class="more-item-icon" style="background:rgba(34,197,94,0.12)">🏦</div><div><div class="more-item-name">Finance</div><div class="more-item-desc">Disbursement tracking</div></div><div class="more-item-arrow">›</div></div>
+        <div class="more-item" onclick="showToast('Reports coming soon','info')"><div class="more-item-icon" style="background:rgba(168,85,247,0.12)">📊</div><div><div class="more-item-name">Reports</div><div class="more-item-desc">GST, Sales, Stock</div></div><div class="more-item-arrow">›</div></div>
+        <div class="section-divider">Data</div>
+        <div class="more-item" onclick="exportData()"><div class="more-item-icon" style="background:rgba(34,197,94,0.12)">📤</div><div><div class="more-item-name">Export JSON</div><div class="more-item-desc">Backup all data</div></div><div class="more-item-arrow">›</div></div>
+        <div class="more-item" id="adminMenuItem" style="display:none" onclick="navTo('admin')"><div class="more-item-icon" style="background:rgba(249,115,22,0.12)">⚡</div><div><div class="more-item-name">Admin Panel</div><div class="more-item-desc">Manage retailers & permissions</div></div><div class="more-item-arrow">›</div></div>
+        <div class="more-item" onclick="showChangePass()"><div class="more-item-icon" style="background:rgba(100,116,139,0.15)">🔑</div><div><div class="more-item-name">Change Password</div><div class="more-item-desc" id="currentUserLabel">-</div></div><div class="more-item-arrow">›</div></div>
+        <div class="more-item" onclick="doLogout()"><div class="more-item-icon" style="background:rgba(239,68,68,0.12)">🚪</div><div><div class="more-item-name">Logout</div><div class="more-item-desc">Sign out</div></div><div class="more-item-arrow">›</div></div>
+      </div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div class="page" id="pageAdmin">
+      <div class="page-top">
+        <div class="page-title">⚡ Admin Panel</div>
+        <button class="btn-add" onclick="openAddRetailer()">+ Add Retailer</button>
+      </div>
+      <div id="retailerList"></div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" id="navDash" onclick="navTo('dash')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+    <div class="nav-item" id="navItems" onclick="navTo('items')"><div class="nav-icon">📦</div><div class="nav-label">Items</div></div>
+    <div class="sale-fab" onclick="navTo('sale')">🧾</div>
+    <div class="nav-item" id="navPurchase" onclick="navTo('purchase')"><div class="nav-icon">📥</div><div class="nav-label">Purchase</div></div>
+    <div class="nav-item" id="navMore" onclick="navTo('more')"><div class="nav-icon">☰</div><div class="nav-label">More</div></div>
+  </nav>
+</div>
+
+<!-- ITEM DRAWER -->
+<div class="modal-overlay" id="itemDrawer">
+  <div class="modal-drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawerTitle">Add Item</div>
+      <button class="drawer-close" onclick="closeItemDrawer()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="form-group"><label>Item Name *</label><input type="text" class="form-input" id="fItemName" placeholder="e.g. Realme Narzo 70 Pro"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Category</label><select class="form-input" id="fItemCat"><option value="">Select</option></select></div>
+        <div class="form-group"><label>Unit</label><select class="form-input" id="fItemUnit"><option value="PCS">PCS</option><option value="KGS">KGS</option><option value="MTR">MTR</option><option value="LTR">LTR</option><option value="BOX">BOX</option><option value="BAG">BAG</option><option value="NOS">NOS</option><option value="SET">SET</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Sale Price (₹)</label><input type="number" class="form-input" id="fSalePrice" placeholder="0.00"></div>
+        <div class="form-group"><label>Purchase Price (₹)</label><input type="number" class="form-input" id="fPurchasePrice" placeholder="0.00"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>HSN Code</label><input type="text" class="form-input" id="fHsn" placeholder="e.g. 85171200"></div>
+        <div class="form-group"><label>GST %</label><select class="form-input" id="fGst"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Opening Stock</label><input type="number" class="form-input" id="fOpenStock" placeholder="0"></div>
+        <div class="form-group"><label>Min Stock Alert</label><input type="number" class="form-input" id="fMinStock" placeholder="0"></div>
+      </div>
+      <div class="form-group"><label>EAN / Barcode</label><input type="text" class="form-input" id="fBarcode" placeholder="Scan or type"></div>
+      <div class="form-group"><label>Brand</label><input type="text" class="form-input" id="fBrand" placeholder="e.g. Realme, Samsung"></div>
+      <div class="form-group"><label>Serial Tracking</label><select class="form-input" id="fSerial"><option value="none">None</option><option value="imei">IMEI</option><option value="serial">Serial No.</option></select></div>
+      <div class="form-group"><label>Description</label><input type="text" class="form-input" id="fDesc" placeholder="Optional"></div>
+      <button class="btn-save" id="saveItemBtn" onclick="saveItem()">Save Item</button>
+      <button class="btn-danger" id="deleteItemBtn" onclick="deleteItem()" style="display:none">Delete Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD RETAILER DRAWER -->
+<div class="modal-overlay" id="retailerDrawer">
+  <div class="modal-drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+      <div class="drawer-title" id="retailerDrawerTitle">Add Retailer</div>
+      <button class="drawer-close" onclick="closeRetailerDrawer()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="form-group"><label>Business Name *</label><input type="text" class="form-input" id="rBizName" placeholder="AG Mobile Shoppee"></div>
+      <div class="form-group"><label>Username *</label><input type="text" class="form-input" id="rUsername" placeholder="agmobile"></div>
+      <div class="form-group"><label>Password *</label><input type="text" class="form-input" id="rPassword" placeholder="Min 6 characters"></div>
+      <div class="form-group"><label>Phone</label><input type="tel" class="form-input" id="rPhone" placeholder="9800000000"></div>
+      <div class="form-group"><label>Business Type</label><select class="form-input" id="rBizType"><option value="mobile_retail">Mobile Retail</option><option value="chemical">Chemical</option><option value="general">General</option></select></div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Permissions</div>
+        <div class="perm-grid" id="permGrid">
+          <label style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:10px;font-size:13px"><input type="checkbox" id="pBilling" checked> Billing</label>
+          <label style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:10px;font-size:13px"><input type="checkbox" id="pPurchase" checked> Purchase</label>
+          <label style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:10px;font-size:13px"><input type="checkbox" id="pReports" checked> Reports</label>
+          <label style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:10px;font-size:13px"><input type="checkbox" id="pGst"> GST Reports</label>
+          <label style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:10px;font-size:13px"><input type="checkbox" id="pItems" checked> Items Master</label>
+          <label style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:10px;font-size:13px"><input type="checkbox" id="pParties" checked> Parties</label>
+        </div>
+      </div>
+      <div class="form-group"><label>Max Users</label><select class="form-input" id="rMaxUsers"><option value="1">1 (Free)</option><option value="3">3</option><option value="7" selected>7 (Standard)</option><option value="15">15 (Premium)</option></select></div>
+      <button class="btn-save" id="saveRetailerBtn" onclick="saveRetailer()">Create Retailer</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD DRAWER -->
+<div class="modal-overlay" id="changePassDrawer">
+  <div class="modal-drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+      <div class="drawer-title">Change Password</div>
+      <button class="drawer-close" onclick="document.getElementById('changePassDrawer').classList.remove('active')">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="form-group"><label>New Password</label><input type="password" class="form-input" id="newPass1" placeholder="Min 6 characters"></div>
+      <div class="form-group"><label>Confirm Password</label><input type="password" class="form-input" id="newPass2" placeholder="Repeat password"></div>
+      <button class="btn-save" onclick="changePassword()">Update Password</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// FIREBASE CONFIG
+const firebaseConfig={apiKey:"AIzaSyDLH-LvMC6RkgsRzJPW4zyX7dIEJ-bJtWw",authDomain:"retailpro-3eda5.firebaseapp.com",databaseURL:"https://retailpro-3eda5-default-rtdb.firebaseio.com",projectId:"retailpro-3eda5",storageBucket:"retailpro-3eda5.firebasestorage.app",messagingSenderId:"648322550479",appId:"1:648322550479:web:3653a4a1610a91f40885ba"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.database();
+
+// SUPER ADMIN CONFIG
+const SUPER_ADMIN={username:'mausamk87',email:'mausamk87@retailpro.in'};
+
+let currentUser=null,currentProfile=null,userRef=null,allItems={},allCategories={},currentItemTab='products',editingKey=null,editingRetailerKey=null;
+
+// AUTH STATE
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    currentUser=user;
+    const isSuperAdmin=user.email===SUPER_ADMIN.email;
+    if(isSuperAdmin){
+      currentProfile={username:'mausamk87',bizName:'RetailPro Admin',role:'superadmin',permissions:{billing:true,purchase:true,reports:true,gst:true,items:true,parties:true}};
+      userRef=db.ref('admin_data');
+      document.getElementById('adminMenuItem').style.display='flex';
+      document.getElementById('headerRole').textContent='Super Admin';
+    }else{
+      // Load retailer profile
+      const snap=await db.ref('retailers').orderByChild('email').equalTo(user.email).once('value');
+      const data=snap.val();
+      if(data){
+        const key=Object.keys(data)[0];
+        currentProfile=data[key];
+        currentProfile.key=key;
+        userRef=db.ref('users/'+key);
+        document.getElementById('headerRole').textContent='Retailer';
+      }
+    }
+    setupUI();
+    loadData();
+    showScreen('appScreen');
+  }else{
+    currentUser=null;currentProfile=null;userRef=null;
+    showScreen('loginScreen');
+  }
+});
+
+function setupUI(){
+  if(!currentProfile)return;
+  document.getElementById('headerBizName').textContent=currentProfile.bizName||currentProfile.username||'RetailPro';
+  document.getElementById('currentUserLabel').textContent=currentProfile.username||'';
+  const now=new Date();
+  document.getElementById('dashDate').textContent=now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+  const h=now.getHours();
+  document.getElementById('dashGreet').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', '+(currentProfile.bizName||'there')+'! 👋';
+}
+
+// LOGIN
+window.doLogin=async function(){
+  const username=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!username||!pass){showLoginError('Username aur password daalo');return;}
+  const btn=document.querySelector('#loginScreen .btn-primary');
+  btn.disabled=true;btn.textContent='Signing in…';
+  document.getElementById('loginError').style.display='none';
+  try{
+    let email;
+    if(username===SUPER_ADMIN.username){
+      email=SUPER_ADMIN.email;
+    }else{
+      // Find retailer email
+      const snap=await db.ref('retailers').orderByChild('username').equalTo(username).once('value');
+      const data=snap.val();
+      if(!data){throw{message:'Username nahi mila'};}
+      const key=Object.keys(data)[0];
+      email=data[key].email;
+    }
+    await auth.signInWithEmailAndPassword(email,pass);
+  }catch(e){
+    btn.disabled=false;btn.textContent='Sign In';
+    const msgs={'auth/wrong-password':'Password galat hai','auth/user-not-found':'User nahi mila','auth/invalid-credential':'Username ya password galat hai','auth/too-many-requests':'Bohot tries — thoda ruko'};
+    showLoginError(msgs[e.code]||e.message);
+  }
+};
+
+window.doLogout=async function(){await auth.signOut();};
+
+function showLoginError(msg){const el=document.getElementById('loginError');el.textContent=msg;el.style.display='block';}
+
+// DATA
+function loadData(){
+  if(!userRef)return;
+  userRef.child('items').on('value',snap=>{allItems=snap.val()||{};renderItems();updateDashStats();renderRecentItems();});
+  userRef.child('categories').on('value',snap=>{allCategories=snap.val()||{};updateCatDropdown();if(currentItemTab==='categories')renderCategories();});
+  if(currentProfile?.role==='superadmin')loadRetailers();
+}
+
+// NAVIGATION
+const pageMap={dash:{page:'pageDash',nav:'navDash'},items:{page:'pageItems',nav:'navItems'},sale:{page:'pageSale',nav:'navSale'},purchase:{page:'pagePurchase',nav:'navPurchase'},more:{page:'pageMore',nav:'navMore'},admin:{page:'pageAdmin',nav:'navMore'}};
+window.navTo=function(key){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const m=pageMap[key];
+  if(m){document.getElementById(m.page).classList.add('active');if(m.nav)document.getElementById(m.nav).classList.add('active');}
+  if(key==='items')renderItems();
+};
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ITEMS
+window.switchItemTab=function(tab){
+  currentItemTab=tab;
+  ['products','categories','units'].forEach(t=>{document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active',t===tab);});
+  document.getElementById('itemSearch').value='';renderItems();
+};
+
+window.renderItems=function(){
+  const q=document.getElementById('itemSearch').value.toLowerCase();
+  const container=document.getElementById('itemsContent');
+  if(currentItemTab==='products'){
+    const keys=Object.keys(allItems).filter(k=>!q||allItems[k].name?.toLowerCase().includes(q)||allItems[k].brand?.toLowerCase().includes(q));
+    if(keys.length===0){container.innerHTML=`<div class="empty-state"><div class="empty-icon">📦</div><h3>No items yet</h3><p>Add your first product</p><button class="btn-add" onclick="openItemDrawer()" style="margin:0 auto">+ Add Item</button></div>`;return;}
+    container.innerHTML=`<div class="item-list">${keys.sort((a,b)=>(allItems[b].updated_at||0)-(allItems[a].updated_at||0)).map(k=>{
+      const i=allItems[k],stock=i.open_stock||0,min=i.min_stock||0;
+      const sc=stock<=0?'zero':stock<=min&&min>0?'low':'ok';
+      const st=stock<=0?'Out of stock':stock<=min&&min>0?`Low: ${stock}`:`Stock: ${stock}`;
+      return`<div class="item-card" onclick="openItemDrawer('${k}')"><div class="item-icon">${getCatIcon(i.category)}</div><div class="item-info"><div class="item-name">${i.name}</div><div class="item-meta">${[i.brand,i.unit||'PCS',i.hsn?'HSN:'+i.hsn:''].filter(Boolean).join(' · ')}</div></div><div class="item-right"><div class="item-price">₹${parseFloat(i.sale_price||0).toLocaleString('en-IN')}</div><div class="item-stock ${sc}">${st}</div></div></div>`;
+    }).join('')}</div>`;
+  }else if(currentItemTab==='categories'){renderCategories();}
+  else{renderUnits();}
+};
+
+function renderCategories(){
+  const container=document.getElementById('itemsContent');
+  const cats=Object.entries(allCategories);
+  let html=`<button class="btn-add" style="margin-bottom:12px" onclick="addCategory()">+ Add Category</button>`;
+  if(cats.length===0){html+=`<div class="empty-state"><div class="empty-icon">🏷️</div><h3>No categories</h3></div>`;container.innerHTML=html;return;}
+  html+=`<div class="item-list">${cats.map(([k,c])=>{const count=Object.values(allItems).filter(i=>i.category===k).length;return`<div class="item-card" onclick="editCategory('${k}')"><div class="item-icon">${c.icon||'🏷️'}</div><div class="item-info"><div class="item-name">${c.name}</div><div class="item-meta">${count} items</div></div><div class="more-item-arrow">›</div></div>`;}).join('')}</div>`;
+  container.innerHTML=html;
+}
+
+function renderUnits(){
+  const units=['PCS','KGS','MTR','LTR','BOX','BAG','NOS','SET','DOZ','QTL','TON'];
+  document.getElementById('itemsContent').innerHTML=`<div class="item-list">${units.map(u=>`<div class="item-card"><div class="item-icon">📏</div><div class="item-info"><div class="item-name">${u}</div></div></div>`).join('')}</div>`;
+}
+
+function getCatIcon(k){if(!k)return'📦';return allCategories[k]?.icon||'📦';}
+
+function updateCatDropdown(){
+  const sel=document.getElementById('fItemCat'),cur=sel.value;
+  sel.innerHTML='<option value="">Select Category</option>'+Object.entries(allCategories).map(([k,c])=>`<option value="${k}">${c.name}</option>`).join('');
+  sel.value=cur;
+}
+
+window.openItemDrawer=function(key=null){
+  editingKey=key;
+  document.getElementById('drawerTitle').textContent=key?'Edit Item':'Add Item';
+  document.getElementById('deleteItemBtn').style.display=key?'block':'none';
+  if(key&&allItems[key]){
+    const i=allItems[key];
+    document.getElementById('fItemName').value=i.name||'';document.getElementById('fItemCat').value=i.category||'';document.getElementById('fItemUnit').value=i.unit||'PCS';document.getElementById('fSalePrice').value=i.sale_price||'';document.getElementById('fPurchasePrice').value=i.purchase_price||'';document.getElementById('fHsn').value=i.hsn||'';document.getElementById('fGst').value=i.gst||'18';document.getElementById('fOpenStock').value=i.open_stock||'';document.getElementById('fMinStock').value=i.min_stock||'';document.getElementById('fBarcode').value=i.barcode||'';document.getElementById('fBrand').value=i.brand||'';document.getElementById('fSerial').value=i.serial_type||'none';document.getElementById('fDesc').value=i.description||'';
+  }else{
+    ['fItemName','fSalePrice','fPurchasePrice','fHsn','fOpenStock','fMinStock','fBarcode','fBrand','fDesc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fItemCat').value='';document.getElementById('fItemUnit').value='PCS';document.getElementById('fGst').value='18';document.getElementById('fSerial').value='none';
+  }
+  document.getElementById('itemDrawer').classList.add('active');
+};
+window.closeItemDrawer=function(){document.getElementById('itemDrawer').classList.remove('active');editingKey=null;};
+
+window.saveItem=async function(){
+  const name=document.getElementById('fItemName').value.trim();
+  if(!name){showToast('Item name zaroori hai','error');return;}
+  const btn=document.getElementById('saveItemBtn');btn.disabled=true;btn.textContent='Saving…';
+  const data={name,category:document.getElementById('fItemCat').value,unit:document.getElementById('fItemUnit').value,sale_price:parseFloat(document.getElementById('fSalePrice').value)||0,purchase_price:parseFloat(document.getElementById('fPurchasePrice').value)||0,hsn:document.getElementById('fHsn').value.trim(),gst:parseInt(document.getElementById('fGst').value),open_stock:parseInt(document.getElementById('fOpenStock').value)||0,min_stock:parseInt(document.getElementById('fMinStock').value)||0,barcode:document.getElementById('fBarcode').value.trim(),brand:document.getElementById('fBrand').value.trim(),serial_type:document.getElementById('fSerial').value,description:document.getElementById('fDesc').value.trim(),updated_at:Date.now()};
+  try{
+    if(editingKey){await userRef.child('items/'+editingKey).update(data);showToast('Updated ✅','success');}
+    else{data.created_at=Date.now();await userRef.child('items').push(data);showToast('Item added ✅','success');}
+    closeItemDrawer();
+  }catch(e){showToast('Error: '+e.message,'error');}
+  btn.disabled=false;btn.textContent='Save Item';
+};
+
+window.deleteItem=async function(){
+  if(!editingKey||!confirm('Delete this item?'))return;
+  await userRef.child('items/'+editingKey).remove();
+  showToast('Deleted','info');closeItemDrawer();
+};
+
+window.addCategory=function(){
+  const name=prompt('Category name:');if(!name?.trim())return;
+  const icons={'handset':'📱','mobile':'📱','phone':'📱','speaker':'🔊','accessory':'🎧','chemical':'🧪'};
+  const icon=icons[name.toLowerCase()]||'🏷️';
+  userRef.child('categories').push({name:name.trim(),icon,created_at:Date.now()});
+  showToast('Category added ✅','success');
+};
+window.editCategory=function(key){
+  const name=prompt('Category name:',allCategories[key]?.name);
+  if(!name?.trim())return;
+  userRef.child('categories/'+key).update({name:name.trim()});
+  showToast('Updated ✅','success');
+};
+
+function updateDashStats(){
+  const items=Object.values(allItems);
+  document.getElementById('statItems').textContent=items.length;
+  document.getElementById('statCats').textContent=Object.keys(allCategories).length;
+  document.getElementById('statLow').textContent=items.filter(i=>(i.open_stock||0)<=(i.min_stock||0)&&i.min_stock>0).length;
+  const val=items.reduce((s,i)=>s+((i.purchase_price||0)*(i.open_stock||0)),0);
+  document.getElementById('statValue').textContent='₹'+val.toLocaleString('en-IN',{maximumFractionDigits:0});
+}
+
+function renderRecentItems(){
+  const container=document.getElementById('recentItemsList');
+  const items=Object.entries(allItems).sort((a,b)=>(b[1].updated_at||0)-(a[1].updated_at||0)).slice(0,3);
+  if(items.length===0){container.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">No items yet</div>`;return;}
+  container.innerHTML=`<div class="item-list">${items.map(([k,i])=>{const stock=i.open_stock||0;return`<div class="item-card" onclick="navTo('items')"><div class="item-icon">${getCatIcon(i.category)}</div><div class="item-info"><div class="item-name">${i.name}</div><div class="item-meta">${i.brand||i.unit||'PCS'}</div></div><div class="item-right"><div class="item-price">₹${parseFloat(i.sale_price||0).toLocaleString('en-IN')}</div><div class="item-stock ${stock>0?'ok':'zero'}">${stock} units</div></div></div>`;}).join('')}</div>`;
+}
+
+// ADMIN — RETAILERS
+function loadRetailers(){
+  db.ref('retailers').on('value',snap=>{
+    const data=snap.val()||{};
+    const container=document.getElementById('retailerList');
+    const keys=Object.keys(data);
+    if(keys.length===0){container.innerHTML=`<div class="empty-state"><div class="empty-icon">🏪</div><h3>No retailers yet</h3><p>Add your first retailer</p></div>`;return;}
+    container.innerHTML=keys.map(k=>{
+      const r=data[k];
+      const perms=r.permissions||{};
+      return`<div class="user-card">
+        <div class="user-card-top"><div><div class="user-card-name">🏪 ${r.bizName}</div><div class="user-card-id">@${r.username} · ${r.bizType||'general'}</div></div><button onclick="openEditRetailer('${k}')" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text);font-size:12px;cursor:pointer">Edit</button></div>
+        <div class="perm-grid">
+          <div class="perm-badge ${perms.billing?'on':'off'}">${perms.billing?'✅':'❌'} Billing</div>
+          <div class="perm-badge ${perms.purchase?'on':'off'}">${perms.purchase?'✅':'❌'} Purchase</div>
+          <div class="perm-badge ${perms.reports?'on':'off'}">${perms.reports?'✅':'❌'} Reports</div>
+          <div class="perm-badge ${perms.gst?'on':'off'}">${perms.gst?'✅':'❌'} GST</div>
+          <div class="perm-badge ${perms.items?'on':'off'}">${perms.items?'✅':'❌'} Items</div>
+          <div class="perm-badge ${perms.parties?'on':'off'}">${perms.parties?'✅':'❌'} Parties</div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text3)">Max users: ${r.maxUsers||7} · ${r.phone||'No phone'}</div>
+      </div>`;
+    }).join('');
+  });
+}
+
+window.openAddRetailer=function(){
+  editingRetailerKey=null;
+  document.getElementById('retailerDrawerTitle').textContent='Add Retailer';
+  document.getElementById('saveRetailerBtn').textContent='Create Retailer';
+  ['rBizName','rUsername','rPassword','rPhone'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('rBizType').value='mobile_retail';
+  document.getElementById('rMaxUsers').value='7';
+  ['pBilling','pPurchase','pReports','pItems','pParties'].forEach(id=>document.getElementById(id).checked=true);
+  document.getElementById('pGst').checked=false;
+  document.getElementById('retailerDrawer').classList.add('active');
+};
+
+window.openEditRetailer=function(key){
+  editingRetailerKey=key;
+  document.getElementById('retailerDrawerTitle').textContent='Edit Retailer';
+  document.getElementById('saveRetailerBtn').textContent='Update Retailer';
+  db.ref('retailers/'+key).once('value',snap=>{
+    const r=snap.val();
+    document.getElementById('rBizName').value=r.bizName||'';
+    document.getElementById('rUsername').value=r.username||'';
+    document.getElementById('rPassword').value='';
+    document.getElementById('rPhone').value=r.phone||'';
+    document.getElementById('rBizType').value=r.bizType||'mobile_retail';
+    document.getElementById('rMaxUsers').value=r.maxUsers||7;
+    const p=r.permissions||{};
+    document.getElementById('pBilling').checked=!!p.billing;
+    document.getElementById('pPurchase').checked=!!p.purchase;
+    document.getElementById('pReports').checked=!!p.reports;
+    document.getElementById('pGst').checked=!!p.gst;
+    document.getElementById('pItems').checked=!!p.items;
+    document.getElementById('pParties').checked=!!p.parties;
+  });
+  document.getElementById('retailerDrawer').classList.add('active');
+};
+
+window.closeRetailerDrawer=function(){document.getElementById('retailerDrawer').classList.remove('active');editingRetailerKey=null;};
+
+window.saveRetailer=async function(){
+  const bizName=document.getElementById('rBizName').value.trim();
+  const username=document.getElementById('rUsername').value.trim().toLowerCase();
+  const password=document.getElementById('rPassword').value;
+  if(!bizName||!username){showToast('Business name aur username zaroori hai','error');return;}
+  if(!editingRetailerKey&&password.length<6){showToast('Password min 6 characters','error');return;}
+  const btn=document.getElementById('saveRetailerBtn');btn.disabled=true;btn.textContent='Saving…';
+  try{
+    const email=username+'@retailpro.in';
+    const data={bizName,username,email,phone:document.getElementById('rPhone').value.trim(),bizType:document.getElementById('rBizType').value,maxUsers:parseInt(document.getElementById('rMaxUsers').value),permissions:{billing:document.getElementById('pBilling').checked,purchase:document.getElementById('pPurchase').checked,reports:document.getElementById('pReports').checked,gst:document.getElementById('pGst').checked,items:document.getElementById('pItems').checked,parties:document.getElementById('pParties').checked},updated_at:Date.now()};
+    if(!editingRetailerKey){
+      // Create Firebase Auth user
+      const cred=await auth.createUserWithEmailAndPassword(email,password);
+      data.uid=cred.user.uid;data.created_at=Date.now();
+      await db.ref('retailers').push(data);
+      // Sign back in as admin
+      await auth.signInWithEmailAndPassword(SUPER_ADMIN.email,prompt('Re-enter admin password to continue:'));
+      showToast('Retailer created ✅','success');
+    }else{
+      await db.ref('retailers/'+editingRetailerKey).update(data);
+      if(password.length>=6){
+        // Password update via Firebase needs current user — flag for manual update
+        showToast('Profile updated. Password change: Firebase Console se karo','info');
+      }else{showToast('Retailer updated ✅','success');}
+    }
+    closeRetailerDrawer();
+  }catch(e){showToast('Error: '+e.message,'error');}
+  btn.disabled=false;btn.textContent=editingRetailerKey?'Update Retailer':'Create Retailer';
+};
+
+window.showChangePass=function(){document.getElementById('changePassDrawer').classList.add('active');};
+
+window.changePassword=async function(){
+  const p1=document.getElementById('newPass1').value;
+  const p2=document.getElementById('newPass2').value;
+  if(p1.length<6){showToast('Min 6 characters','error');return;}
+  if(p1!==p2){showToast('Passwords match nahi kar rahe','error');return;}
+  try{await currentUser.updatePassword(p1);showToast('Password changed ✅','success');document.getElementById('changePassDrawer').classList.remove('active');}
+  catch(e){showToast('Error: '+e.message,'error');}
+};
+
+window.exportData=async function(){
+  try{const snap=await userRef.once('value');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(snap.val()||{},null,2)],{type:'application/json'}));a.download='retailpro-'+new Date().toISOString().split('T')[0]+'.json';a.click();showToast('Exported ✅','success');}
+  catch(e){showToast('Error','error');}
+};
+
+let toastTimer;
+window.showToast=function(msg,type='info'){
+  const t=document.getElementById('toast');t.className='toast '+type;
+  t.innerHTML=(type==='success'?'✅':type==='error'?'❌':'ℹ️')+' '+msg;
+  t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+};
+
+document.getElementById('itemDrawer').addEventListener('click',function(e){if(e.target===this)closeItemDrawer();});
+document.getElementById('retailerDrawer').addEventListener('click',function(e){if(e.target===this)closeRetailerDrawer();});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
